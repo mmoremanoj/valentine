@@ -1,1 +1,244 @@
-# valentine
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root{
+      --baby-pink: #ffd6e6;
+      --card: rgba(255,255,255,0.88);
+      --shadow: 0 14px 40px rgba(0,0,0,0.12);
+      --yes: #ff2f6d;
+      --no: #1a1a1a;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top, #ffe8f1, var(--baby-pink));
+      color:#111;
+      overflow:hidden;
+    }
+
+    /* Floating hearts layer */
+    #hearts{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      overflow:hidden;
+    }
+    .heart{
+      position:absolute;
+      bottom:-40px;
+      color:#ff1f57;
+      opacity:0.65;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.08));
+      will-change: transform, opacity;
+    }
+    @keyframes floatUp{
+      0%   { transform: translateY(0) translateX(0) scale(1) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.75; }
+      100% { transform: translateY(-120vh) translateX(var(--drift)) scale(var(--scale)) rotate(var(--rot)); opacity: 0; }
+    }
+
+    .card{
+      width:min(560px, 92vw);
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      text-align:center;
+      position:relative;
+      z-index:1;
+      backdrop-filter: blur(6px);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size: clamp(20px, 4vw, 34px);
+      line-height:1.15;
+    }
+    p{
+      margin: 0 0 18px;
+      opacity:0.85;
+    }
+
+    .btns{
+      position: relative;
+      height: 120px;
+      margin-top: 10px;
+    }
+
+    button{
+      border:0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, box-shadow .2s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      position:absolute;
+    }
+
+    #yes{
+      background: var(--yes);
+      color: white;
+    }
+    #yes:hover{
+      transform: scale(1.05);
+    }
+
+    #no{
+      background: var(--no);
+      color: white;
+    }
+
+    .success{
+      display:none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fff0f6;
+      border: 1px solid rgba(255,47,109,0.25);
+    }
+    .success h2{
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .gif{
+      width: min(380px, 92%);
+      border-radius: 14px;
+      margin-top: 10px;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+    }
+
+    .note{
+      margin-top: 14px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div id="hearts" aria-hidden="true"></div>
+
+  <div class="card">
+    <h1>Manolk, Will you be my Valentines?</h1>
+    <p>Just pick wisely.</p>
+
+    <div class="btns" id="arena">
+      <button id="yes" type="button">Yes</button>
+      <button id="no" type="button" aria-label="No (good luck clicking)">No</button>
+    </div>
+
+    <div class="success" id="success">
+      <h2>Yay!!!! Forever my LOVE!!!</h2>
+      <div id="gifWrap"></div>
+    </div>
+
+    <div class="note">If “No” is hard to click… that’s the point.</div>
+  </div>
+
+  <script>
+    const arena = document.getElementById("arena");
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const success = document.getElementById("success");
+    const gifWrap = document.getElementById("gifWrap");
+    const heartsLayer = document.getElementById("hearts");
+
+    // Two teddies kissing GIF (Tenor)
+    const gifUrl = "https://media.tenor.com/xb1rESQL47EAAAAM/bear-love-teddy-bear-love.gif";
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function moveNoButton() {
+      const rect = arena.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = rect.width - btnRect.width;
+      const maxY = rect.height - btnRect.height;
+
+      const x = Math.random() * Math.max(0, maxX);
+      const y = Math.random() * Math.max(0, maxY);
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top  = `${y}px`;
+      noBtn.style.transform = "none";
+    }
+
+    // Make "No" dodge: hover + touch + focus
+    ["mouseenter", "mousemove", "touchstart", "touchmove", "focus"].forEach(evt => {
+      noBtn.addEventListener(evt, (e) => {
+        e.preventDefault();
+        moveNoButton();
+      }, { passive: false });
+    });
+
+    noBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") moveNoButton();
+    });
+
+    yesBtn.addEventListener("click", () => {
+      arena.style.display = "none";
+      success.style.display = "block";
+      gifWrap.innerHTML = `<img class="gif" src="${gifUrl}" alt="Two teddies kissing GIF">`;
+      document.title = "Yay!!!!";
+    });
+
+    // Initial placement for buttons
+    window.addEventListener("load", () => {
+      const rect = arena.getBoundingClientRect();
+
+      yesBtn.style.left = `${clamp(rect.width * 0.30, 0, rect.width - 90)}px`;
+      yesBtn.style.top  = `${clamp(rect.height * 0.35, 0, rect.height - 44)}px`;
+      yesBtn.style.transform = "none";
+
+      noBtn.style.left  = `${clamp(rect.width * 0.62, 0, rect.width - 80)}px`;
+      noBtn.style.top   = `${clamp(rect.height * 0.35, 0, rect.height - 44)}px`;
+      noBtn.style.transform = "none";
+    });
+
+    // Floating hearts generator
+    function spawnHeart() {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = "❤";
+
+      const size = Math.random() * 10 + 10; // 10px to 20px
+      const left = Math.random() * 100;     // vw
+      const duration = Math.random() * 4 + 5; // 5s to 9s
+      const drift = (Math.random() * 80 - 40).toFixed(0) + "px";
+      const rot = (Math.random() * 90 - 45).toFixed(0) + "deg";
+      const scale = (Math.random() * 0.6 + 0.6).toFixed(2);
+
+      heart.style.left = left + "vw";
+      heart.style.fontSize = size + "px";
+      heart.style.animationDuration = duration + "s";
+      heart.style.setProperty("--drift", drift);
+      heart.style.setProperty("--rot", rot);
+      heart.style.setProperty("--scale", scale);
+
+      heartsLayer.appendChild(heart);
+
+      // Cleanup after animation ends
+      setTimeout(() => heart.remove(), (duration + 0.2) * 1000);
+    }
+
+    // Spawn a steady stream of small hearts
+    setInterval(spawnHeart, 220);
+    // Seed a few immediately
+    for (let i = 0; i < 10; i++) setTimeout(spawnHeart, i * 120);
+  </script>
+</body>
+</html>
