@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root { --pad: 18px; }
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top, #ffe6ef, #fff);
+      color:#111;
+    }
+    .card{
+      width:min(520px, 92vw);
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 28px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    h1{ margin:0 0 10px; font-size: clamp(22px, 4vw, 34px); }
+    p{ margin: 0 0 18px; opacity:0.85; }
+    .btns{
+      position: relative;
+      height: 120px;
+      margin-top: 10px;
+    }
+    button{
+      border:0; border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, box-shadow .2s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      position:absolute;
+    }
+    #yes{
+      left: 50%;
+      transform: translateX(-120%) ;
+      background: #ff3b7a;
+      color: white;
+    }
+    #yes:hover{ transform: translateX(-120%) scale(1.04); }
+    #no{
+      left: 50%;
+      transform: translateX(20%);
+      background: #111;
+      color: white;
+    }
+    .success{
+      display:none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #eafff2;
+      border: 1px solid #b7f3cf;
+    }
+    .success h2{ margin: 0 0 10px; }
+    .gif{
+      width: min(360px, 90%);
+      border-radius: 14px;
+      margin-top: 10px;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+    }
+    .note{
+      margin-top: 14px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Will you be my Valentine?</h1>
+    <p>One click. No pressure. (Okay, tiny pressure.)</p>
+
+    <div class="btns" id="arena">
+      <button id="yes" type="button">Yes</button>
+      <button id="no" type="button" aria-label="No (good luck clicking)">No</button>
+    </div>
+
+    <div class="success" id="success">
+      <h2>Best decision of your life.</h2>
+      <div id="gifWrap"></div>
+    </div>
+
+    <div class="note">Tip: works best on phone too.</div>
+  </div>
+
+  <script>
+    const arena = document.getElementById("arena");
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const success = document.getElementById("success");
+    const gifWrap = document.getElementById("gifWrap");
+
+    // Pick any celebratory GIF you like (Giphy CDN links work fine)
+    // Replace this URL with your preferred GIF if you want.
+    const gifUrl = "https://media.giphy.com/media/3oz8xAFtqoOUUrsh7W/giphy.gif";
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function moveNoButton() {
+      const rect = arena.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = rect.width - btnRect.width;
+      const maxY = rect.height - btnRect.height;
+
+      // Random position inside arena
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top  = `${y}px`;
+      noBtn.style.transform = "none";
+    }
+
+    // Make "No" dodge: on hover + on touch proximity + on focus
+    ["mouseenter", "mousemove", "touchstart", "touchmove", "focus"].forEach(evt => {
+      noBtn.addEventListener(evt, (e) => {
+        e.preventDefault();
+        moveNoButton();
+      }, { passive: false });
+    });
+
+    // Extra: if user tries super hard with keyboard, keep moving
+    noBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") moveNoButton();
+    });
+
+    yesBtn.addEventListener("click", () => {
+      arena.style.display = "none";
+      success.style.display = "block";
+      gifWrap.innerHTML = `<img class="gif" src="${gifUrl}" alt="Celebration GIF">`;
+      // Optional confetti feel (simple)
+      document.title = "YES!! 💖";
+    });
+
+    // On load, place "No" somewhere random so it’s not predictable
+    window.addEventListener("load", () => {
+      // Convert initial centered absolute layout to real positions
+      const rect = arena.getBoundingClientRect();
+      noBtn.style.left = `${clamp(rect.width * 0.65, 0, rect.width - 80)}px`;
+      noBtn.style.top  = `${clamp(rect.height * 0.35, 0, rect.height - 40)}px`;
+      noBtn.style.transform = "none";
+
+      yesBtn.style.left = `${clamp(rect.width * 0.35, 0, rect.width - 80)}px`;
+      yesBtn.style.top  = `${clamp(rect.height * 0.35, 0, rect.height - 40)}px`;
+      yesBtn.style.transform = "none";
+    });
+  </script>
+</body>
+</html>
